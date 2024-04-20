@@ -11,29 +11,38 @@ const router = createRouter({
     {
       path: '/',
       name: 'HomeView',
+      meta: { title: '首页' },
       component: HomeView
     },
     {
       path: '/heritage-appreciation/traditional-quyi',
       name: 'TraditionalQuyi',
+      meta: { title: '传统曲艺' },
       component: TraditionalQuyi
     },
     {
       path: '/heritage-appreciation/traditional-skill',
       name: 'TraditionalSkill',
+      meta: { title: '传统技艺' },
       component: TraditionalSkill
     },
     {
       path: '/heritage-appreciation/traditional-dance',
       name: 'TraditionalDance',
+      meta: { title: '传统舞蹈' },
       component: TraditionalDance
     },
     {
       path: '/visit-record',
       name: 'VisitRecord',
+      meta: { title: '参观记录' },
       component: VisitRecord
-    },
+    }
   ]
+})
+
+router.beforeEach((to) => {
+  document.title = to.meta?.title || ''
 })
 
 export default router
