@@ -1,9 +1,10 @@
 <script setup>
 import { ref, shallowRef, watch } from 'vue'
 import { ElButton, ElRadioGroup, ElRadio } from 'element-plus'
-import { fabric } from 'fabric'
 import { saveAs } from 'file-saver'
 import ImageUpload from '@/components/VisitRecord/ImageUpload.vue'
+
+const fabric = window.fabric
 
 const peopleImageUrl = ref()
 const sceneImgUrl = ref()
@@ -31,10 +32,14 @@ const filterList = ref([
   { label: '彩色', value: '13' }
 ])
 
+const isDrawingMode = ref(false)
+
 watch(canvasElRef, () => {
   canvasRef.value = new fabric.Canvas(canvasElRef.value)
   peopleImageUrl.value = '/people.png'
   sceneImgUrl.value = '/scene.jpg'
+  canvasRef.value.freeDrawingBrush = new fabric.EraserBrush(canvasRef.value)
+  canvasRef.value.freeDrawingBrush.width = 10
 })
 
 function setPeopleImg() {
@@ -63,6 +68,7 @@ function setSceneImg() {
     })
     setImgFilters(img)
     img.set('selectable', false)
+    img.set('erasable', false)
     sceneImgRef.value = img
     canvasRef.value?.insertAt(img, 0)
   })
@@ -70,11 +76,16 @@ function setSceneImg() {
 watch(sceneImgUrl, setSceneImg)
 
 watch(filterValue, () => {
-  setPeopleImg()
-  setSceneImg()
+  setImgFilters(peopleImgRef.value)
+  setImgFilters(sceneImgRef.value)
+})
+
+watch(isDrawingMode, () => {
+  canvasRef.value.isDrawingMode = isDrawingMode.value
 })
 
 function setImgFilters(image) {
+  image.filters = []
   switch (filterValue.value) {
     case '0':
       break //原图
@@ -124,6 +135,21 @@ function setImgFilters(image) {
       break
   }
   image.applyFilters()
+  canvasRef.value.renderAndResetBound()
+}
+
+function erase() {
+  canvasRef.value.freeDrawingBrush.inverted = false
+  isDrawingMode.value = true
+}
+
+function undoErase() {
+  canvasRef.value.freeDrawingBrush.inverted = true
+  isDrawingMode.value = true
+}
+
+function completeErase() {
+  isDrawingMode.value = false
 }
 
 function exportPicture() {
@@ -156,7 +182,14 @@ function exportPicture() {
             </template>
           </el-radio-group>
         </div>
-        <div class="text-right">
+        <div class="flex items-center justify-between">
+          <div>
+            <el-button type="primary" @click="erase">擦除</el-button>
+            <el-button type="primary" @click="undoErase">取消擦除</el-button>
+            <el-button v-if="isDrawingMode" type="primary" @click="completeErase"
+              >完成擦除</el-button
+            >
+          </div>
           <el-button type="primary" @click="exportPicture">导出照片</el-button>
         </div>
       </div>
