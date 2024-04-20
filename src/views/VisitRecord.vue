@@ -42,7 +42,9 @@ watch(canvasElRef, () => {
   canvasRef.value.freeDrawingBrush.width = 10
 })
 
-function setPeopleImg() {
+watch(peopleImageUrl, () => {
+  isDrawingMode.value = false
+
   peopleImgRef.value && canvasRef.value?.remove(peopleImgRef.value)
 
   canvasRef.value.remove()
@@ -55,10 +57,11 @@ function setPeopleImg() {
     peopleImgRef.value = img
     canvasRef.value?.insertAt(img, 1)
   })
-}
-watch(peopleImageUrl, setPeopleImg)
+})
 
-function setSceneImg() {
+watch(sceneImgUrl, () => {
+  isDrawingMode.value = false
+
   sceneImgRef.value && canvasRef.value?.remove(sceneImgRef.value)
 
   fabric.Image.fromURL(sceneImgUrl.value, function (img) {
@@ -72,12 +75,12 @@ function setSceneImg() {
     sceneImgRef.value = img
     canvasRef.value?.insertAt(img, 0)
   })
-}
-watch(sceneImgUrl, setSceneImg)
+})
 
 watch(filterValue, () => {
   setImgFilters(peopleImgRef.value)
   setImgFilters(sceneImgRef.value)
+  canvasRef.value.renderAndResetBound()
 })
 
 watch(isDrawingMode, () => {
@@ -135,7 +138,6 @@ function setImgFilters(image) {
       break
   }
   image.applyFilters()
-  canvasRef.value.renderAndResetBound()
 }
 
 function erase() {
