@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import TraditionalQuyi from '@/views/heritage-appreciation/TraditionalQuyi.vue'
 import TraditionalSkill from '@/views/heritage-appreciation/TraditionalSkill.vue'
@@ -6,7 +6,7 @@ import TraditionalDance from '@/views/heritage-appreciation/TraditionalDance.vue
 import VisitRecord from '@/views/VisitRecord.vue'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
