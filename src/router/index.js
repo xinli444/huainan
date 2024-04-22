@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import TraditionalQuyi from '@/views/heritage-appreciation/TraditionalQuyi.vue'
 import TraditionalSkill from '@/views/heritage-appreciation/TraditionalSkill.vue'
+import TraditionalSkillOne from '@/views/heritage-appreciation/TraditionalSkillOne.vue'
 import TraditionalDance from '@/views/heritage-appreciation/TraditionalDance.vue'
 import VisitRecord from '@/views/VisitRecord.vue'
 
@@ -25,6 +26,12 @@ const router = createRouter({
       name: 'TraditionalSkill',
       meta: { title: '传统技艺' },
       component: TraditionalSkill
+    },
+    {
+      path: '/heritage-appreciation/traditional-skill/1',
+      name: 'TraditionalSkillOne',
+      meta: { title: '淮南牛肉汤' },
+      component: TraditionalSkillOne
     },
     {
       path: '/heritage-appreciation/traditional-dance',
