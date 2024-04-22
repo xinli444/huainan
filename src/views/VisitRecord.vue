@@ -1,8 +1,17 @@
 <script setup>
 import { ref, shallowRef, watch } from 'vue'
-import { ElButton, ElRadioGroup, ElRadio } from 'element-plus'
+import {
+  ElButton,
+  ElDropdown,
+  ElDropdownMenu,
+  ElDropdownItem,
+  ElIcon,
+  vLoading
+} from 'element-plus'
 import { saveAs } from 'file-saver'
 import ImageUpload from '@/components/VisitRecord/ImageUpload.vue'
+import { ArrowDown } from '@element-plus/icons-vue'
+import bgVisitRecord from '@/assets/images/bg-visit-record.png'
 
 const fabric = window.fabric
 
@@ -15,29 +24,34 @@ const peopleImgRef = shallowRef()
 const sceneImgRef = shallowRef()
 
 const filterValue = ref('0')
-const filterList = ref([
-  { label: '原图', value: '0' },
-  { label: '灰度', value: '1' },
-  { label: '底片', value: '2' },
-  { label: '黑白', value: '3' },
-  { label: '怀旧', value: '4' },
-  { label: '模糊', value: '5' },
-  { label: '老照片', value: '6' },
-  { label: '混合', value: '7' },
-  { label: '调和', value: '8' },
-  { label: '棕仙', value: '9' },
-  { label: '彩色胶片', value: '10' },
-  { label: '马赛克', value: '11' },
-  { label: '宝丽来', value: '12' },
-  { label: '彩色', value: '13' }
-])
+// const filterList = ref([
+//   { label: '原图', value: '0' },
+//   { label: '灰度', value: '1' },
+//   { label: '底片', value: '2' },
+//   { label: '黑白', value: '3' },
+//   { label: '怀旧', value: '4' },
+//   { label: '模糊', value: '5' },
+//   { label: '老照片', value: '6' },
+//   { label: '混合', value: '7' },
+//   { label: '调和', value: '8' },
+//   { label: '棕仙', value: '9' },
+//   { label: '彩色胶片', value: '10' },
+//   { label: '马赛克', value: '11' },
+//   { label: '宝丽来', value: '12' },
+//   { label: '彩色', value: '13' }
+// ])
 
 const isDrawingMode = ref(false)
 
+const dataUrl = ref('')
+const isLoading = ref(false)
+
+const prompt = ref('')
+
 watch(canvasElRef, () => {
   canvasRef.value = new fabric.Canvas(canvasElRef.value)
-  peopleImageUrl.value = '/people.png'
-  sceneImgUrl.value = '/scene.jpg'
+  // peopleImageUrl.value = '/people.png'
+  // sceneImgUrl.value = '/scene.jpg'
   canvasRef.value.freeDrawingBrush = new fabric.EraserBrush(canvasRef.value)
   canvasRef.value.freeDrawingBrush.width = 10
 })
@@ -141,60 +155,128 @@ function setImgFilters(image) {
 }
 
 function erase() {
+  if (!sceneImgUrl.value) {
+    return
+  }
   canvasRef.value.freeDrawingBrush.inverted = false
   isDrawingMode.value = true
 }
 
 function undoErase() {
+  if (!sceneImgUrl.value) {
+    return
+  }
   canvasRef.value.freeDrawingBrush.inverted = true
   isDrawingMode.value = true
 }
 
 function completeErase() {
+  if (!sceneImgUrl.value) {
+    return
+  }
   isDrawingMode.value = false
 }
 
-function exportPicture() {
-  const dataUrl = canvasRef.value.toDataURL()
-  saveAs(dataUrl, `${new Date().getTime()}.png`)
+async function handleCommand(command) {
+  prompt.value = command
+  await exportPicture()
+}
+
+async function exportPicture() {
+  dataUrl.value = canvasRef.value.toDataURL()
+
+  isLoading.value = true
+  const formData = new FormData()
+  formData.append('projectID', 's1')
+  formData.append('img', dataUrl.value.substring(22))
+  formData.append('prompt', prompt.value)
+  try {
+    const res = await fetch('/api/stream_predict', {
+      method: 'post',
+      headers: {
+        // 'Content-Type': 'multipart/form-data'
+      },
+      body: formData
+    })
+    const json = await res.json()
+    saveAs(`data:image/jpg;base64,${json.img}`, `${new Date().getTime()}.jpg`)
+  } catch (error) {
+    console.error(error)
+  }
+  isLoading.value = false
 }
 </script>
 
 <template>
-  <main>
-    <div class="flex justify-center items-center space-x-[16px]">
-      <div>
+  <main
+    v-loading="isLoading"
+    element-loading-text="处理中"
+    class="h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
+    :style="{ backgroundImage: `url(${bgVisitRecord})` }"
+  >
+    <div class="flex justify-center items-center space-x-[84px]">
+      <div class="space-y-[56px]">
         <ImageUpload v-model="peopleImageUrl">
-          <el-button type="primary">
-            <span>上传人像</span>
-          </el-button>
+          <img src="@/assets/images/icon-upload-people.png" alt="" class="w-[80px] h-[80px]" />
+          <span class="text-[16px] text-[#C0DEEF] leading-[24px] mt-[16px]">上传人像</span>
         </ImageUpload>
         <ImageUpload v-model="sceneImgUrl">
-          <el-button type="primary">
-            <span>选择风景</span>
-          </el-button>
+          <img src="@/assets/images/icon-upload-scene.png" alt="" class="w-[80px] h-[80px]" />
+          <span class="text-[16px] text-[#C0DEEF] leading-[24px] mt-[16px]">选择风景</span>
         </ImageUpload>
+        <div class="space-y-[16px]">
+          <el-button type="primary" size="large" class="w-full" @click="erase">擦除</el-button>
+          <div class="flex">
+            <el-button type="primary" plain size="large" class="w-1/2" @click="undoErase"
+              >取消擦除</el-button
+            >
+            <el-button type="primary" plain size="large" class="w-1/2" @click="completeErase"
+              >完成擦除</el-button
+            >
+          </div>
+          <el-dropdown
+            type="primary"
+            class="w-full export-dropdown"
+            @command="handleCommand"
+            @click="exportPicture"
+          >
+            <el-button type="primary">
+              导出照片<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="潇洒的男人">潇洒的男人</el-dropdown-item>
+                <el-dropdown-item command="美丽的女人">美丽的女人</el-dropdown-item>
+                <el-dropdown-item command="战争风云">战争风云</el-dropdown-item>
+                <el-dropdown-item command="风和日丽">风和日丽</el-dropdown-item>
+                <el-dropdown-item command="静谧温馨">静谧温馨</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
       </div>
-      <div>
+      <div class="bg-white rounded-[8px] border-[1px] border-solid border-[#81BDDE]">
         <canvas ref="canvasElRef" width="960" height="540"></canvas>
-        <div class="mt-[8px]">
+        <!-- <div class="mt-[8px]">
           <el-radio-group v-model="filterValue">
             <template v-for="{ label, value } in filterList" :key="value">
               <el-radio :label="label" :value="value" />
             </template>
           </el-radio-group>
-        </div>
-        <div class="flex items-center justify-between">
-          <div>
-            <el-button type="primary" @click="erase">擦除</el-button>
-            <el-button type="primary" @click="undoErase">取消擦除</el-button>
-            <el-button v-if="isDrawingMode" type="primary" @click="completeErase"
-              >完成擦除</el-button
-            >
-          </div>
-          <el-button type="primary" @click="exportPicture">导出照片</el-button>
-        </div>
+        </div> -->
       </div>
     </div>
   </main>
 </template>
+
+<style lang="scss" scoped>
+.export-dropdown {
+  :deep(.el-button-group) {
+    display: inline-flex;
+    width: 100%;
+  }
+  :deep(.el-button):first-child {
+    flex: auto;
+  }
+}
+</style>

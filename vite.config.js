@@ -15,6 +15,19 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
+  server: {
+    port: 5199,
+    host: '0.0.0.0',
+    // 本地跨域代理 https://cn.vitejs.dev/config/server-options.html#server-proxy
+    proxy: {
+      '/api': {
+        target: 'http://zymsgmsmsms.nat300.top',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
+  },
+
   esbuild: {
     drop: isProd ? ['console', 'debugger'] : []
   },

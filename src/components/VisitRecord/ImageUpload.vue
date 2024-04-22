@@ -1,8 +1,7 @@
 <script setup>
 import { onBeforeUnmount, ref, watch } from 'vue'
 import { useVModel } from '@vueuse/core'
-import { ElUpload, ElIcon, ElImage } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
+import { ElUpload, ElImage } from 'element-plus'
 
 const props = defineProps({
   modelValue: String
@@ -11,8 +10,6 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const modelValue = useVModel(props, 'modelValue', emit)
-
-const triggerRef = ref()
 
 const fileList = ref([])
 
@@ -45,15 +42,6 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="flex flex-col items-center">
-    <el-image
-      v-if="fileList.length"
-      :src="fileList[0].url"
-      class="w-[148px] h-[148px]"
-      fit="scale-down"
-    />
-    <div v-else class="el-upload el-upload--picture-card" @click="triggerRef.click()">
-      <el-icon><Plus /></el-icon>
-    </div>
     <el-upload
       :file-list="fileList"
       :show-file-list="false"
@@ -63,7 +51,16 @@ onBeforeUnmount(() => {
       class="mt-[8px]"
       :on-change="handleChange"
     >
-      <div ref="triggerRef">
+      <el-image
+        v-if="fileList.length"
+        :src="fileList[0].url"
+        class="w-[288px] h-[162px]"
+        fit="scale-down bg-white"
+      />
+      <div
+        v-else
+        class="w-[288px] h-[162px] flex flex-col items-center justify-center border-[#81BDDE] border-[1px] border-solid rounded-[6px] bg-white"
+      >
         <slot></slot>
       </div>
     </el-upload>
