@@ -35,7 +35,7 @@ const router = createRouter({
     {
       path: '/visit-record',
       name: 'VisitRecord',
-      meta: { title: '参观记录' },
+      meta: { title: '参观纪念' },
       component: VisitRecord
     }
   ]

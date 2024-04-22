@@ -211,7 +211,7 @@ async function exportPicture() {
   <main
     v-loading="isLoading"
     element-loading-text="处理中"
-    class="h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
+    class="h-full flex items-center justify-center bg-cover bg-center bg-no-repeat"
     :style="{ backgroundImage: `url(${bgVisitRecord})` }"
   >
     <div class="flex justify-center items-center space-x-[84px]">
