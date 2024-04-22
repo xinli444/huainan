@@ -5,15 +5,15 @@
     <div class="mb-[89px] flex justify-center">
       <img src="/home-page-2-top.png" class="w-[509px] h-[122px] " alt="">
     </div>
-    <el-carousel :interval="4000" type="card" height="629px">
-      <el-carousel-item v-for="item in list" :key="item.title" >
+    <el-carousel :interval="4000" type="card" height="629px" >
+      <el-carousel-item v-for="item in list" :key="item.title" class="rounded-[8px] shadow-[0_0_10px_0_rgba(0,0,0,0.5)] w-[722px]">
         <div class="relative w-[722px]">
           <img :src="item.src" class="w-[722px] h-[478px]" alt="">
-          <div class="absolute bottom-0 bg-[rgba(0,0,0,0.50)] text-white text-[24px] leading-[31px] pt-[20px] text-center w-full">
+          <div class="absolute bottom-0 bg-[rgba(0,0,0,0.50)] text-white text-[24px] leading-[70px] text-center w-full">
             {{ item.title }}
           </div>
         </div>
-        <div class="w-[722px] px-[10px] py-[20px] text-[#666666] text-[16px] tracking-[1px] leading-[26px]">
+        <div class="w-[722px] px-[10px] py-[16px] text-[#666666] text-[16px] tracking-[1px] leading-[26px]">
           {{ item.desc }}
         </div>
       </el-carousel-item>
@@ -21,7 +21,7 @@
   </div>
 </template>
 <script setup>
-import { ElCarousel } from 'element-plus'
+import { ElCarousel, ElCarouselItem } from 'element-plus'
 const list = [
   {
     title:'历史文化',
